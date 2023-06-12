@@ -1,0 +1,86 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    image: stuze:${STUZE_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    labels:
+      # Enables traefik for this container.
+    - traefik.enable=true
+    - traefik.http.routers.stuze.rule=Host(`${STUZE_TRAEFIK_HOST:-stuze.localhost}`)
+    - traefik.http.routers.stuze.entrypoints=http
+    - traefik.http.routers.stuze.service=stuze
+    - traefik.http.services.stuze.loadbalancer.server.port=${STUZE_PORT:-8000}
+    networks:
+    - default
+    - traefik-shared
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      STUZE_HOST: 0.0.0.0
+      STUZE_DB_HOST: stuze-db
+      STUZE_DB_PORT: 5432
+      STUZE_DB_USER: stuze
+      STUZE_DB_PASS: stuze
+      STUZE_DB_BASE: stuze
+
+  db:
+    image: postgres:13.8-bullseye
+    hostname: stuze-db
+    environment:
+      POSTGRES_PASSWORD: "stuze"
+      POSTGRES_USER: "stuze"
+      POSTGRES_DB: "stuze"
+    volumes:
+    - stuze-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U stuze
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: stuze:${STUZE_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      STUZE_DB_HOST: stuze-db
+      STUZE_DB_PORT: 5432
+      STUZE_DB_USER: stuze
+      STUZE_DB_PASS: stuze
+      STUZE_DB_BASE: stuze
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "stuze-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  stuze-db-data:
+    name: stuze-db-data
+
+networks:
+  # Network for traefik.
+  traefik-shared:
+    name: traefik-shared
