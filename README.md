@@ -1,11 +1,19 @@
 # stuze
 
-This project was generated using fastapi_template.
+This project is a multivendor marketplace implemented using a multitenancy architecture. It allows multiple vendors to sell their products and services on a single platform while maintaining their own separate and secure space within the platform.
 
-## Poetry
+## Features
 
-This project uses poetry. It's a modern dependency management
-tool.
+-   Vendor management: Each vendor has their own dashboard to manage their products and services.
+-   Product and service listings: Vendors can create and manage listings for their products and services.
+-   Payment processing: The platform handles payment processing for all transactions.
+-   Order fulfillment: Vendors can manage and fulfill orders placed by customers.
+
+## Multitenancy
+
+The platform is implemented using a multitenancy architecture, which allows for greater scalability and flexibility in managing multiple vendors. Each vendor has their own separate and secure space within the platform to manage their products and services.
+
+## Run
 
 To run the project use this set of commands:
 
@@ -71,7 +79,7 @@ This application can be configured with environment variables.
 You can create `.env` file in the root directory and place all
 environment variables here.
 
-All environment variabels should start with "STUZE_" prefix.
+All environment variabels should start with "STUZE\_" prefix.
 
 For example if you see in your "stuze/settings.py" a variable named like
 `random_parameter`, you should provide the "STUZE_RANDOM_PARAMETER"
@@ -79,6 +87,7 @@ variable to configure the value. This behaviour can be changed by overriding `en
 in `stuze.settings.Settings.Config`.
 
 An exmaple of .env file:
+
 ```bash
 STUZE_RELOAD="True"
 STUZE_PORT="8000"
@@ -90,6 +99,7 @@ You can read more about BaseSettings class here: https://pydantic-docs.helpmanua
 ## Pre-commit
 
 To install pre-commit simply run inside the shell:
+
 ```bash
 pre-commit install
 ```
@@ -98,18 +108,19 @@ pre-commit is very useful to check your code before publishing it.
 It's configured using .pre-commit-config.yaml file.
 
 By default it runs:
-* black (formats your code);
-* mypy (validates types);
-* isort (sorts imports in all files);
-* flake8 (spots possibe bugs);
-* yesqa (removes useless `# noqa` comments).
 
+-   black (formats your code);
+-   mypy (validates types);
+-   isort (sorts imports in all files);
+-   flake8 (spots possibe bugs);
+-   yesqa (removes useless `# noqa` comments).
 
 You can read more about pre-commit here: https://pre-commit.com/
 
 ## Migrations
 
 If you want to migrate your database, you should run following commands:
+
 ```bash
 # To run all migrations untill the migration with revision_id.
 alembic upgrade "<revision_id>"
@@ -121,6 +132,7 @@ alembic upgrade "head"
 ### Reverting migrations
 
 If you want to revert migrations, you should run:
+
 ```bash
 # revert all migrations up to: revision_id.
 alembic downgrade <revision_id>
@@ -132,6 +144,7 @@ alembic downgrade <revision_id>
 ### Migration generation
 
 To generate migrations you should run:
+
 ```bash
 # For automatic change detection.
 alembic revision --autogenerate
@@ -139,7 +152,6 @@ alembic revision --autogenerate
 # For empty file generation.
 alembic revision
 ```
-
 
 ## Running tests
 
@@ -151,15 +163,17 @@ docker-compose -f deploy/docker-compose.yml --project-directory . down
 ```
 
 For running tests on your local machine.
+
 1. you need to start a database.
 
 I prefer doing it with docker:
+
 ```
 docker run -p "5432:5432" -e "POSTGRES_PASSWORD=stuze" -e "POSTGRES_USER=stuze" -e "POSTGRES_DB=stuze" postgres:13.8-bullseye
 ```
 
-
 2. Run the pytest.
+
 ```bash
 pytest -vv .
 ```
